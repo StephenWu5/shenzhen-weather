@@ -5,102 +5,96 @@
  */
 
 import React, { Component } from 'react';
-import { Text, Image, View, ImageBackground, StyleSheet } from 'react-native';
+import {
+	Animated,
+	Image,
+	Platform,
+	ScrollView,
+	StyleSheet,
+	TouchableOpacity,
+	Text,
+	StatusBar,
+	View,
+} from 'react-native';
+// import { Ionicons } from '@expo/vector-icons'; // Version can be specified in package.json
+import { TabNavigator, TabBarBottom } from 'react-navigation';
+import TodayScreen from './components/today';  // 从HomeScreen页面导入HomeScreen组件，HomeScreen其实是表示HomeScreen.js。./表示当前页面，不可删除
+import ForecastScreen from './components/forecast'; 
 
 
-export default class App extends Component<{}> {
-	constructor(props) {
-		super(props);
-		this.state = {
-		weatherData: {
-			forecast: [
-			{ high: 'high' },
-			{ high: 'high1' },
-			]
-		},
-		hello: "hello"
-		}
-		this.getWeather = this.getWeather.bind(this);
+const ExampleInfo = {
+	TodayScreen: {
+		name: 'TodayScreen',
+		description: 'TodayScreen',
+	},
+	ForecastScreen: {
+		name: 'ForecastScreen',
+		description: 'ForecastScreen',
 	}
+};
 
-	getWeather() {
-		fetch('https://www.apiopen.top/weatherApi?city=深圳').then((response) => {
-			return response.json()
-		}).then((data) => {
-			const todayStart = data.data.forecast[0].fengli.indexOf('A[');
-			data.data.forecast[0].fengli = data.data.forecast[0].fengli.substr(todayStart + 2, 3);
-			this.setState({
-				weatherData: data.data
-			})
-		}).catch((e) => {
-			console.log("err", '1111');
-		})
-	}
+const ExampleRoutes = {
+	TodayScreen,
+	ForecastScreen
+};
 
-	componentWillMount() {
-		console.log('componentWillMount', '1111');
-		this.getWeather();
-	}
+
+class MainScreen extends React.Component<any, State> {
 	render() {
 		return (
-			<View style={styles.main}>
-				<View>
-					<Text style={styles.todayTitle}>今天天气</Text>
-					<Text style={styles.todayDate}>本月{this.state.weatherData.forecast[0].date}</Text>
-					<Text style={styles.today}>{this.state.weatherData.forecast[0].high}</Text>
-					<Text style={[styles.today, styles.today_black]}>平均温度:{this.state.weatherData.wendu}℃</Text>
-					<Text style={[styles.today, styles.todayLow]}>{this.state.weatherData.forecast[0].low}</Text>
-
-					<Text style={[styles.today, styles.todayLeixing]}>{this.state.weatherData.forecast[0].type}</Text>
-					<Text style={[styles.today, styles.todayFengxiang]}>风力:{this.state.weatherData.forecast[0].fengli}</Text>
-					<Text style={[styles.today, styles.todayFengxiang]}>{this.state.weatherData.forecast[0].fengxiang}</Text>
-
-					<Text style={[styles.today,styles.jianchi]}>为什么坚持,想一想当初.</Text>
-				</View>
-			</View>
+			<TodayScreen />
 		);
 	}
 }
 
-const styles = StyleSheet.create({
-	main:{
-		flex: 1,
-		backgroundColor: '#C7EDCC'
+const AppNavigator = TabNavigator(
+	{
+		Today: { screen: TodayScreen },
+		Forecast: { screen: ForecastScreen },
 	},
-	todayTitle: {
-		fontSize: 56,
-		textAlign: 'center',
-		marginTop: 80
-	},
-	todayDate: {
-		fontSize: 24,
-		lineHeight: 34,
-		textAlign: 'center',
-		marginBottom: 10,
-		color: 'black'
-	},
-	today: {
-		fontSize: 20,
-		color: 'red',
-		textAlign: 'center'
-	},
-	today_black: {
-		color: 'black'
-	},
-	todayLow: {
-		color: 'blue',
-	},
-	todayLeixing: {
-		marginTop: 15,
-		fontSize: 28,
-		color: 'black',
-		marginBottom: 15
-	},
-	todayFengxiang: {
-		fontSize: 20,
-		color: 'skyblue'
-	},
-	jianchi: {
-		marginTop:100
+	{
+		navigationOptions: ({ navigation }) => ({
+			tabBarLabel: ({ focused, tintColor }) => {
+				const { routeName } = navigation.state;
+				let iconName;
+				if (routeName === 'Today') {
+					iconName = '今天天气';
+				} else if (routeName === 'Forecast') {
+					iconName = '未来天气';
+				}
+
+				// You can return any component that you like here! We usually use an
+				// icon component from react-native-vector-icons
+				return iconName;
+			},
+			tabBarIcon: ({ focused, tintColor }) => {
+				const { routeName } = navigation.state;
+				let iconName;
+				if (routeName === 'Today') {
+					iconName = `ios-information-circle${focused ? '' : '-outline'}`;
+				} else if (routeName === 'Forecast') {
+					iconName = `ios-options${focused ? '' : '-outline'}`;
+				}
+
+				// You can return any component that you like here! We usually use an
+				// icon component from react-native-vector-icons
+				return null;
+			},
+		}),
+		tabBarComponent: TabBarBottom,
+		tabBarPosition: 'bottom',
+		tabBarOptions: {
+			activeTintColor: 'tomato',
+			inactiveTintColor: 'gray',
+			labelStyle: {
+				fontSize: 24,
+				lineHeight: 28,
+				height: 28,
+			},
+		},
+		animationEnabled: false,
+		swipeEnabled: false,
 	}
-})
+);
+
+export default AppNavigator;
